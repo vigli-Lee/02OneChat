@@ -58,10 +58,26 @@ class MainActivity : AppCompatActivity() {
                     SharedPreferenceUtil.putIsLogin(this, false)
                     isLogin = false
                     Toast.makeText(this, "로그아웃 됐습니다.", Toast.LENGTH_SHORT).show()
+                } else {
+                    //로그인 선택
+                    var startLoginActivity = Intent(this, LoginActivity::class.java)
+                    startActivityForResult(startLoginActivity, LoginActivity.CODE_REQUEST)
                 }
             }
         }
 
         return super.onOptionsItemSelected(item)
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+
+        when (requestCode) {
+            LoginActivity.CODE_REQUEST -> {
+                if (resultCode == Activity.RESULT_OK) {
+                    Toast.makeText(this, "로그인 했습니다.", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
     }
 }
