@@ -3,6 +3,8 @@ package com.mobile.vigli.onechat.main
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.Toast
@@ -16,6 +18,7 @@ import com.mobile.vigli.onechat.util.SharedPreferenceUtil
 
 class MainActivity : AppCompatActivity() {
     lateinit var binding: ActivityMainBinding
+    lateinit var adapter: MainChatAdapter
     private var isLogin = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -28,15 +31,47 @@ class MainActivity : AppCompatActivity() {
         )
 
         var chatItems = ArrayList<ChatItem>()
-        for (idx in 1..100) {
-            var chatItem = ChatItem("메시지 입니다. $idx")
-            chatItems.add(chatItem)
-        }
 
+        //init and setting recycler view
         var linearLayoutManager = LinearLayoutManager(this)
-        var adapter = MainChatAdapter(chatItems)
+        adapter = MainChatAdapter(chatItems)
         binding.rvChat.layoutManager = linearLayoutManager
         binding.rvChat.adapter = adapter
+
+        //보내기 버튼
+        binding.btnSend.setOnClickListener {
+            var message = binding.etInput.text.toString()
+            //초기화
+            binding.etInput.text.clear()
+
+            var chatItem = ChatItem(message)
+            addItem(chatItem)
+        }
+
+        //입력값에 따라 보내기 버튼 상태 변경
+        binding.etInput.addTextChangedListener(object: TextWatcher {
+            override fun afterTextChanged(p0: Editable?) {
+
+            }
+
+            override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
+
+            }
+
+            override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
+                binding.btnSend.isEnabled = !p0.isNullOrEmpty()
+            }
+        })
+    }
+
+    /**
+     * 메시지를 추가한다.
+     *
+     * @param chatItem
+     */
+    private fun addItem(chatItem: ChatItem) {
+        adapter.addItem(chatItem)
+        binding.rvChat.smoothScrollToPosition(adapter.itemCount - 1)
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {

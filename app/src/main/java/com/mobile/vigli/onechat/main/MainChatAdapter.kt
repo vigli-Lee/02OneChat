@@ -24,6 +24,11 @@ class MainChatAdapter(var chatItems: ArrayList<ChatItem>): RecyclerView.Adapter<
         holder.binding?.tvMessage?.text = chatItems[position].message
     }
 
+    fun addItem(chatItem: ChatItem) {
+        chatItems.add(chatItem)
+        notifyItemInserted(chatItems.size - 1)
+    }
+
     class ChatViewHolder(view: View): RecyclerView.ViewHolder(view) {
         var binding = DataBindingUtil.bind<ItemChattingBinding>(view)
 
