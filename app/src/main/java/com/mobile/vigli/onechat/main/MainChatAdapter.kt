@@ -1,4 +1,4 @@
-package com.mobile.vigli.onechat
+package com.mobile.vigli.onechat.main
 
 import android.view.LayoutInflater
 import android.view.View
@@ -6,6 +6,7 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.databinding.DataBindingUtil
 import androidx.recyclerview.widget.RecyclerView
+import com.mobile.vigli.onechat.R
 import com.mobile.vigli.onechat.databinding.ItemChattingBinding
 
 class MainChatAdapter(var chatItems: ArrayList<ChatItem>): RecyclerView.Adapter<MainChatAdapter.ChatViewHolder>() {

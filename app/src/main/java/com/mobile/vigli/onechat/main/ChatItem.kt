@@ -1,4 +1,4 @@
-package com.mobile.vigli.onechat
+package com.mobile.vigli.onechat.main
 
 /**
  * 채팅 메시지 데이터 클래스
