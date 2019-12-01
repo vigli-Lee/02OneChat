@@ -40,12 +40,15 @@ class MainActivity : AppCompatActivity() {
 
         //보내기 버튼
         binding.btnSend.setOnClickListener {
-            var message = binding.etInput.text.toString()
-            //초기화
-            binding.etInput.text.clear()
+            if (isLogin) {
+                var message = binding.etInput.text.toString()
+                //초기화
+                binding.etInput.text.clear()
 
-            var chatItem = ChatItem(message)
-            addItem(chatItem)
+                var chatItem = ChatItem(message)
+                addItem(chatItem)
+            }
+            else Toast.makeText(this, "로그인이 필요합니다.", Toast.LENGTH_SHORT).show()
         }
 
         //입력값에 따라 보내기 버튼 상태 변경
