@@ -11,6 +11,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.mobile.vigli.onechat.ChatDatabaseHelper
 import com.mobile.vigli.onechat.R
 import com.mobile.vigli.onechat.databinding.ActivityMainBinding
 import com.mobile.vigli.onechat.login.LoginActivity
@@ -30,7 +31,7 @@ class MainActivity : AppCompatActivity() {
             R.layout.activity_main
         )
 
-        var chatItems = ArrayList<ChatItem>()
+        var chatItems = getChatItemsInDatabase()
 
         //init and setting recycler view
         var linearLayoutManager = LinearLayoutManager(this)
@@ -73,6 +74,10 @@ class MainActivity : AppCompatActivity() {
      * @param chatItem
      */
     private fun addItem(chatItem: ChatItem) {
+        //insert db
+        insertChatItemInDatabase(chatItem)
+
+        //add RecyclerView
         adapter.addItem(chatItem)
         binding.rvChat.smoothScrollToPosition(adapter.itemCount - 1)
     }
@@ -117,5 +122,26 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         }
+    }
+
+    private fun getChatItemsInDatabase(): ArrayList<ChatItem> {
+        var chatItems = ArrayList<ChatItem>()
+        var db = ChatDatabaseHelper(this).readableDatabase
+        var cursor = db.rawQuery("SELECT * FROM CHAT_TABLE", null)
+        while (cursor.moveToNext()) {
+            var message = cursor.getString(1)
+            var chatItem = ChatItem(message)
+            chatItems.add(chatItem)
+        }
+
+        db.close()
+
+        return chatItems
+    }
+
+    private fun insertChatItemInDatabase(chatItem: ChatItem) {
+        var db = ChatDatabaseHelper(this).writableDatabase
+        db.execSQL("INSERT INTO CHAT_TABLE(message) VALUES('${chatItem.message}')")
+        db.close()
     }
 }
