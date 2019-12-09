@@ -11,6 +11,8 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.google.firebase.database.*
+import com.mobile.vigli.onechat.ChatApplication
 import com.mobile.vigli.onechat.ChatDatabaseHelper
 import com.mobile.vigli.onechat.R
 import com.mobile.vigli.onechat.databinding.ActivityMainBinding
@@ -18,18 +20,29 @@ import com.mobile.vigli.onechat.login.LoginActivity
 import com.mobile.vigli.onechat.util.SharedPreferenceUtil
 
 class MainActivity : AppCompatActivity() {
-    lateinit var binding: ActivityMainBinding
-    lateinit var adapter: MainChatAdapter
+    private lateinit var binding: ActivityMainBinding
+    private lateinit var adapter: MainChatAdapter
+
+    private lateinit var email: String
     private var isLogin = false
+
+    private lateinit var myRef: DatabaseReference
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         isLogin = SharedPreferenceUtil.getUserLogin(this)
+        if (isLogin) email = (application as ChatApplication).user!!.email!!
 
         binding = DataBindingUtil.setContentView(this,
             R.layout.activity_main
         )
+
+        //init db
+        // Write a message to the database
+        val database = FirebaseDatabase.getInstance()
+        myRef = database.getReference("one_chat")
 
         var chatItems = getChatItemsInDatabase()
 
@@ -46,7 +59,7 @@ class MainActivity : AppCompatActivity() {
                 //초기화
                 binding.etInput.text.clear()
 
-                var chatItem = ChatItem(message)
+                var chatItem = ChatItem(message, email)
                 addItem(chatItem)
             }
             else Toast.makeText(this, "로그인이 필요합니다.", Toast.LENGTH_SHORT).show()
@@ -100,6 +113,9 @@ class MainActivity : AppCompatActivity() {
                     item.title = "로그인"
                     SharedPreferenceUtil.putIsLogin(this, false)
                     isLogin = false
+
+                    //파이어베이스 로그아웃
+                    (application as ChatApplication).signOut()
                     Toast.makeText(this, "로그아웃 됐습니다.", Toast.LENGTH_SHORT).show()
                 } else {
                     //로그인 선택
@@ -119,6 +135,7 @@ class MainActivity : AppCompatActivity() {
             LoginActivity.CODE_REQUEST -> {
                 if (resultCode == Activity.RESULT_OK) {
                     Toast.makeText(this, "로그인 했습니다.", Toast.LENGTH_SHORT).show()
+                    email = (application as ChatApplication).user!!.email!!
                 }
             }
         }
@@ -126,22 +143,24 @@ class MainActivity : AppCompatActivity() {
 
     private fun getChatItemsInDatabase(): ArrayList<ChatItem> {
         var chatItems = ArrayList<ChatItem>()
-        var db = ChatDatabaseHelper(this).readableDatabase
-        var cursor = db.rawQuery("SELECT * FROM CHAT_TABLE", null)
-        while (cursor.moveToNext()) {
-            var message = cursor.getString(1)
-            var chatItem = ChatItem(message)
-            chatItems.add(chatItem)
-        }
 
-        db.close()
+        myRef.addValueEventListener(object : ValueEventListener {
+            override fun onDataChange(dataSnapshot: DataSnapshot) {
+                // This method is called once with the initial value and again
+                // whenever data at this location is updated.
+                val value = dataSnapshot.getValue(ChatItem::class.java)
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                // Failed to read value
+
+            }
+        })
 
         return chatItems
     }
 
     private fun insertChatItemInDatabase(chatItem: ChatItem) {
-        var db = ChatDatabaseHelper(this).writableDatabase
-        db.execSQL("INSERT INTO CHAT_TABLE(message) VALUES('${chatItem.message}')")
-        db.close()
+        myRef.setValue(chatItem)
     }
 }

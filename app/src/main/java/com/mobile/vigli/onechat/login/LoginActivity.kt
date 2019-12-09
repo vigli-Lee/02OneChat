@@ -14,6 +14,7 @@ import com.google.android.gms.common.api.ApiException
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
 import com.mobile.vigli.onechat.BuildConfig
+import com.mobile.vigli.onechat.ChatApplication
 import com.mobile.vigli.onechat.R
 import com.mobile.vigli.onechat.databinding.ActivityLoginBinding
 import com.mobile.vigli.onechat.util.SharedPreferenceUtil
@@ -29,7 +30,7 @@ class LoginActivity : AppCompatActivity() {
         binding = DataBindingUtil.setContentView(this, R.layout.activity_login)
 
         //파이어베이스 인증 초기화
-        auth = FirebaseAuth.getInstance()
+        auth = (application as ChatApplication).auth
 
         //구글 로그인 초기화
         val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
@@ -64,7 +65,6 @@ class LoginActivity : AppCompatActivity() {
                 val account = task.getResult(ApiException::class.java)
                 firebaseAuthWithGoogle(account!!)
             } catch (e: ApiException) {
-
             }
         }
     }
@@ -75,7 +75,7 @@ class LoginActivity : AppCompatActivity() {
             .addOnCompleteListener(this) { task ->
                 if (task.isSuccessful) {
                     Toast.makeText(this, "구글 계정으로 로그인 했습니다.", Toast.LENGTH_SHORT).show()
-                    val user = auth.currentUser
+                    (application as ChatApplication).user = auth.currentUser
                     SharedPreferenceUtil.putIsLogin(this, true)
                     finish()
                 } else {
