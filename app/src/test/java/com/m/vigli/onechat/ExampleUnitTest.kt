@@ -1,4 +1,4 @@
-package com.mobile.vigli.onechat
+package com.m.vigli.onechat
 
 import org.junit.Test
 

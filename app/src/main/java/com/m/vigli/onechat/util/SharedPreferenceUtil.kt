@@ -1,4 +1,4 @@
-package com.mobile.vigli.onechat.util
+package com.m.vigli.onechat.util
 
 import android.content.Context
 

@@ -1,4 +1,4 @@
-package com.mobile.vigli.onechat
+package com.m.vigli.onechat
 
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.ext.junit.runners.AndroidJUnit4

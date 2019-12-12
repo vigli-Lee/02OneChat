@@ -1,8 +1,9 @@
-package com.mobile.vigli.onechat.login
+package com.m.vigli.onechat.login
 
+import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
+import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
@@ -13,11 +14,11 @@ import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
-import com.mobile.vigli.onechat.BuildConfig
-import com.mobile.vigli.onechat.ChatApplication
-import com.mobile.vigli.onechat.R
-import com.mobile.vigli.onechat.databinding.ActivityLoginBinding
-import com.mobile.vigli.onechat.util.SharedPreferenceUtil
+import com.m.vigli.onechat.BuildConfig
+import com.m.vigli.onechat.ChatApplication
+import com.m.vigli.onechat.R
+import com.m.vigli.onechat.databinding.ActivityLoginBinding
+import com.m.vigli.onechat.util.SharedPreferenceUtil
 
 class LoginActivity : AppCompatActivity() {
     lateinit var binding: ActivityLoginBinding
@@ -65,21 +66,27 @@ class LoginActivity : AppCompatActivity() {
                 val account = task.getResult(ApiException::class.java)
                 firebaseAuthWithGoogle(account!!)
             } catch (e: ApiException) {
+                //에러 메시지 출력
             }
         }
     }
 
     private fun firebaseAuthWithGoogle(acct: GoogleSignInAccount) {
+        binding.clProgressLayout.visibility = View.VISIBLE
+
         val credential = GoogleAuthProvider.getCredential(acct.idToken, null)
         auth.signInWithCredential(credential)
             .addOnCompleteListener(this) { task ->
+                binding.clProgressLayout.visibility = View.GONE
+
                 if (task.isSuccessful) {
                     Toast.makeText(this, "구글 계정으로 로그인 했습니다.", Toast.LENGTH_SHORT).show()
                     (application as ChatApplication).user = auth.currentUser
                     SharedPreferenceUtil.putIsLogin(this, true)
+                    setResult(Activity.RESULT_OK)
                     finish()
                 } else {
-
+                    //error 메시지 출력
                 }
             }
     }

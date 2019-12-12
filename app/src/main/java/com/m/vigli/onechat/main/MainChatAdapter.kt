@@ -1,4 +1,4 @@
-package com.mobile.vigli.onechat.main
+package com.m.vigli.onechat.main
 
 import android.view.LayoutInflater
 import android.view.View
@@ -6,8 +6,8 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.databinding.DataBindingUtil
 import androidx.recyclerview.widget.RecyclerView
-import com.mobile.vigli.onechat.R
-import com.mobile.vigli.onechat.databinding.ItemChattingBinding
+import com.m.vigli.onechat.R
+import com.m.vigli.onechat.databinding.ItemChattingBinding
 
 class MainChatAdapter(var chatItems: ArrayList<ChatItem>): RecyclerView.Adapter<MainChatAdapter.ChatViewHolder>() {
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ChatViewHolder {
@@ -22,6 +22,7 @@ class MainChatAdapter(var chatItems: ArrayList<ChatItem>): RecyclerView.Adapter<
 
     override fun onBindViewHolder(holder: ChatViewHolder, position: Int) {
         holder.binding?.tvMessage?.text = chatItems[position].message
+        holder.binding?.tvEmail?.text = chatItems[position].email
     }
 
     fun addItem(chatItem: ChatItem) {
@@ -29,13 +30,7 @@ class MainChatAdapter(var chatItems: ArrayList<ChatItem>): RecyclerView.Adapter<
         notifyItemInserted(chatItems.size - 1)
     }
 
-    class ChatViewHolder(view: View): RecyclerView.ViewHolder(view) {
+    inner class ChatViewHolder(view: View): RecyclerView.ViewHolder(view) {
         var binding = DataBindingUtil.bind<ItemChattingBinding>(view)
-
-        init {
-            binding!!.root.setOnClickListener {
-                Toast.makeText(view.context, "$adapterPosition", Toast.LENGTH_SHORT).show()
-            }
-        }
     }
 }

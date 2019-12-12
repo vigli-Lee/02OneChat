@@ -3,7 +3,7 @@
  * Kmong.com
  */
 
-package com.mobile.vigli.onechat
+package com.m.vigli.onechat
 
 import android.app.Application
 import com.google.firebase.auth.FirebaseAuth

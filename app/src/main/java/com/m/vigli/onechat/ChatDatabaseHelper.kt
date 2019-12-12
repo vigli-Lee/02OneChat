@@ -3,7 +3,7 @@
  * Kmong.com
  */
 
-package com.mobile.vigli.onechat
+package com.m.vigli.onechat
 
 import android.content.Context
 import android.database.sqlite.SQLiteDatabase

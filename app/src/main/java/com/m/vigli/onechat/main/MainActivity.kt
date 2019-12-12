@@ -1,4 +1,4 @@
-package com.mobile.vigli.onechat.main
+package com.m.vigli.onechat.main
 
 import android.app.Activity
 import android.content.Intent
@@ -12,12 +12,11 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.firebase.database.*
-import com.mobile.vigli.onechat.ChatApplication
-import com.mobile.vigli.onechat.ChatDatabaseHelper
-import com.mobile.vigli.onechat.R
-import com.mobile.vigli.onechat.databinding.ActivityMainBinding
-import com.mobile.vigli.onechat.login.LoginActivity
-import com.mobile.vigli.onechat.util.SharedPreferenceUtil
+import com.m.vigli.onechat.ChatApplication
+import com.m.vigli.onechat.R
+import com.m.vigli.onechat.databinding.ActivityMainBinding
+import com.m.vigli.onechat.login.LoginActivity
+import com.m.vigli.onechat.util.SharedPreferenceUtil
 
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
@@ -27,6 +26,8 @@ class MainActivity : AppCompatActivity() {
     private var isLogin = false
 
     private lateinit var myRef: DatabaseReference
+
+    private var signMenuItem: MenuItem? = null
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -89,10 +90,6 @@ class MainActivity : AppCompatActivity() {
     private fun addItem(chatItem: ChatItem) {
         //insert db
         insertChatItemInDatabase(chatItem)
-
-        //add RecyclerView
-        adapter.addItem(chatItem)
-        binding.rvChat.smoothScrollToPosition(adapter.itemCount - 1)
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
@@ -101,7 +98,8 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onPrepareOptionsMenu(menu: Menu?): Boolean {
-        menu?.findItem(R.id.menuLogin)?.title = if (isLogin) "로그아웃" else "로그인"
+        signMenuItem = menu?.findItem(R.id.menuLogin)
+        signMenuItem?.title = if (isLogin) "로그아웃" else "로그인"
         return super.onPrepareOptionsMenu(menu)
     }
 
@@ -134,8 +132,12 @@ class MainActivity : AppCompatActivity() {
         when (requestCode) {
             LoginActivity.CODE_REQUEST -> {
                 if (resultCode == Activity.RESULT_OK) {
-                    Toast.makeText(this, "로그인 했습니다.", Toast.LENGTH_SHORT).show()
+                    isLogin = true
                     email = (application as ChatApplication).user!!.email!!
+                    signMenuItem?.title = "로그아웃"
+                } else {
+                    isLogin = false
+                    signMenuItem?.title = "로그인"
                 }
             }
         }
@@ -144,15 +146,25 @@ class MainActivity : AppCompatActivity() {
     private fun getChatItemsInDatabase(): ArrayList<ChatItem> {
         var chatItems = ArrayList<ChatItem>()
 
-        myRef.addValueEventListener(object : ValueEventListener {
-            override fun onDataChange(dataSnapshot: DataSnapshot) {
-                // This method is called once with the initial value and again
-                // whenever data at this location is updated.
-                val value = dataSnapshot.getValue(ChatItem::class.java)
+        myRef.addChildEventListener(object: ChildEventListener {
+            override fun onCancelled(p0: DatabaseError) {
+
             }
 
-            override fun onCancelled(error: DatabaseError) {
-                // Failed to read value
+            override fun onChildMoved(p0: DataSnapshot, p1: String?) {
+
+            }
+
+            override fun onChildChanged(dataSnapshot: DataSnapshot, p1: String?) {
+            }
+
+            override fun onChildAdded(dataSnapshot: DataSnapshot, p1: String?) {
+                val chatItem = dataSnapshot.getValue(ChatItem::class.java)
+                if (chatItem != null) adapter.addItem(chatItem)
+                binding.rvChat.smoothScrollToPosition(adapter.itemCount - 1)
+            }
+
+            override fun onChildRemoved(p0: DataSnapshot) {
 
             }
         })
@@ -161,6 +173,6 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun insertChatItemInDatabase(chatItem: ChatItem) {
-        myRef.setValue(chatItem)
+        myRef.push().setValue(chatItem)
     }
 }
