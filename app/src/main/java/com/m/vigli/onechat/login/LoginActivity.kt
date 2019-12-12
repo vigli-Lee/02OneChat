@@ -14,6 +14,8 @@ import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
+import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.iid.FirebaseInstanceId
 import com.m.vigli.onechat.BuildConfig
 import com.m.vigli.onechat.ChatApplication
 import com.m.vigli.onechat.R
@@ -84,6 +86,8 @@ class LoginActivity : AppCompatActivity() {
                     (application as ChatApplication).user = auth.currentUser
                     SharedPreferenceUtil.putIsLogin(this, true)
                     setResult(Activity.RESULT_OK)
+
+                    registerUserInfo()
                     finish()
                 } else {
                     //error 메시지 출력
@@ -99,6 +103,21 @@ class LoginActivity : AppCompatActivity() {
         val signInIntent = googleSignInClient.signInIntent
         startActivityForResult(signInIntent, RC_SIGN_IN)
     }
+
+    private fun registerUserInfo() {
+        FirebaseInstanceId.getInstance().instanceId.addOnCompleteListener {
+            if (it.isSuccessful) {
+                var uid = auth.currentUser!!.uid!!
+                var email = auth.currentUser!!.email!!
+                var token = it.result!!.token
+                var user = HashMap<String, String>()
+                user["email"] = email
+                user["fcmToken"] = token
+                FirebaseDatabase.getInstance().getReference("push").child(uid).setValue(user)
+            }
+        }
+    }
+
 
     companion object {
         const val CODE_REQUEST = 1
